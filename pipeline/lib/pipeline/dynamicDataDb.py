@@ -1,8 +1,8 @@
 import pandas as pd
 import requests
 import json
-from settings import *
-from secrets import *
+from pipeline.settings import *
+from pipeline.secrets import *
 
 
 class DatabaseManager:

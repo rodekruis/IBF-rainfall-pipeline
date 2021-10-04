@@ -49,19 +49,7 @@ RUN python3 -m pip install --no-cache-dir \
     --upgrade \
     && python3 -m pip install --no-cache-dir numpy
 
-# copy files
-RUN mkdir --parents /home/ibf/
-WORKDIR /home/ibf/pipeline/
-
-# install dependencies
-COPY pipeline/requirements.txt /home/ibf/pipeline/
-RUN pip install -r requirements.txt
-
-# set up cronjob
-COPY pipeline/entrypoint.sh /home/ibf/pipeline/entrypoint.sh
-COPY pipeline/crontab /etc/cron.d/crontab
-RUN chmod 0644 /etc/cron.d/crontab
-RUN crontab /etc/cron.d/crontab
-RUN touch /var/log/cron.log
-
-CMD tail -f /dev/null
+# install rainfall model
+WORKDIR /pipeline
+ADD pipeline .
+RUN pip install .

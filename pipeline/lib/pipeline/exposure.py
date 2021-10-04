@@ -9,7 +9,7 @@ import pandas as pd
 from pandas import DataFrame
 import json
 
-from settings import *
+from pipeline.settings import *
 import os
 
 

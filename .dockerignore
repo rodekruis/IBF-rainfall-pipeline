@@ -10,7 +10,6 @@
 
 
 # Local data files
-pipeline/data/*
 !pipeline/data/README.md
 
 
@@ -30,7 +29,7 @@ npm-debug.log*
 .npm
 
 # Secrets
-pipeline/secrets.py
+pipeline/lib/pipeline/secrets.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

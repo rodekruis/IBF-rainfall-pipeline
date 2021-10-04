@@ -6,7 +6,7 @@ from pandas import DataFrame
 import urllib.request
 import urllib.error
 import time
-from settings import *
+from pipeline.settings import *
 import math
 import geopandas as gpd
 from shapely.geometry import Point
@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 import requests
 import json
 from geocube.api.core import make_geocube
-from secrets import SETTINGS_SECRET
+from pipeline.secrets import SETTINGS_SECRET
 
 
 class RainfallData:

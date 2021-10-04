@@ -33,10 +33,10 @@ SOFT_LIMIT = 10000
 ###################
 ## PATH SETTINGS ##
 ###################
-RASTER_DATA = 'data/raster/'
+RASTER_DATA = '/pipeline/data/raster/'
 RASTER_INPUT = RASTER_DATA + 'input/'
 RASTER_OUTPUT = RASTER_DATA + 'output/'
-PIPELINE_DATA = 'data/other/'
+PIPELINE_DATA = '/pipeline/data/other/'
 PIPELINE_INPUT = PIPELINE_DATA + 'input/'
 PIPELINE_OUTPUT = PIPELINE_DATA + 'output/'
 

@@ -1,9 +1,9 @@
-from lib.pipeline.forecast import Forecast
+from pipeline.forecast import Forecast
 import traceback
 import time
 import datetime
-from settings import *
-from secrets import *
+from pipeline.settings import *
+from pipeline.secrets import *
 import resource
 
 

@@ -30,7 +30,7 @@ npm-debug.log*
 .npm
 
 # Secrets
-pipeline/secrets.py
+pipeline/lib/pipeline/secrets.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

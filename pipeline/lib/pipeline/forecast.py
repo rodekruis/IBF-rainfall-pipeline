@@ -1,6 +1,6 @@
-from lib.pipeline.rainfalldata import RainfallData
-from lib.pipeline.exposure import Exposure
-from lib.pipeline.dynamicDataDb import DatabaseManager
+from pipeline.rainfalldata import RainfallData
+from pipeline.exposure import Exposure
+from pipeline.dynamicDataDb import DatabaseManager
 import pandas as pd
 import json
 from shapely import wkb, wkt
