@@ -211,7 +211,7 @@ class RainfallData:
         geometry = [Point(xy) for xy in zip(
             df_leadtime.lon.astype(float), df_leadtime.lat.astype(float))]
         threshold_gdf = gpd.GeoDataFrame(df_leadtime, geometry=geometry)
-        threshold_gdf.crs = {"init":"epsg:4326"}
+        threshold_gdf.crs = "EPSG:4326"
         
         ## forecast (.5 degree)
         fc_by_day = grb_clip.sel(
@@ -219,7 +219,7 @@ class RainfallData:
         geometry = [Point(xy) for xy in zip(
             fc_by_day.longitude.astype(float), fc_by_day.latitude.astype(float))]
         fc_gdf = gpd.GeoDataFrame(fc_by_day, geometry=geometry)
-        fc_gdf.crs = {"init":"epsg:4326"}
+        fc_gdf.crs = "EPSG:4326"
 
         ## spatial join forecast and threshold and check if a location has rainfall exceeding the threshold
         compare_gdf = gpd.sjoin(fc_gdf, threshold_gdf, 
@@ -241,7 +241,7 @@ class RainfallData:
 
         cube = make_geocube(vector_data=df_trigger, 
                             measurements=[str(str(self.leadTimeLabel)+'_pred')], 
-                            resolution=(0.5, -0.5), output_crs="EPSG:4326")
+                            resolution=(-0.5, 0.5), align=(0.25, 0.25), output_crs="EPSG:4326")
         cube.rio.to_raster(self.rainrasterPath)
 
         print('Processed Rainfall data - File saved')
