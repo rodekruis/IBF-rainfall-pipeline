@@ -45,4 +45,4 @@ PIPELINE_OUTPUT = PIPELINE_DATA + 'output/'
 #########################
 
 # GFS rainfall input
-GFS_SOURCE = 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/'
+GFS_SOURCE = 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/naefs/prod/'
