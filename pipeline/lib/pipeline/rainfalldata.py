@@ -34,6 +34,8 @@ class RainfallData:
         self.downloaded = False
 
     def process(self):
+        if self.leadTimeValue > 3:
+            self.downloaded = True
         if not self.downloaded:
             self.removeOldForecastData()
             self.download()
@@ -134,28 +136,26 @@ class RainfallData:
 
     def download_GEFS_forecast(self):
 
-
-        url = 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/naefs/prod/'
+        url = GFS_SOURCE
         
         url_1 = self.listFD(url, ext='')#[1:]
         gefs_url = sorted([i for i in url_1 if i.split('/')[-2].startswith('gefs.')], reverse=True)
-        fc_hrs = np.arange(24, 198, 24)
+        fc_hrs = np.arange(24, 216, 24)
         
         for url_date in gefs_url:
             date = url_date.split('/')[-2][5:]
             hour_url = self.listFD(url_date, ext='')
             # runcycle = ['00', '06', '12', '18']
 
-            if len(hour_url) >= 2: # check if there are dir of all 4 runcycle and the parent directory in the url
+            if len(hour_url) >= 5: # check if there are dir of all 4 runcycle and the parent directory in the url
 
-                for url_i in hour_url[1:2]:
+                for url_i in hour_url[1:5]:
                     # url_list = listFD(url_i, ext='')
                     hr = url_i.split('/')[-2]
                     filename_in = ['geprcp.t' + hr + 'z.pgrb2a.0p50.bc_24hf' + 
                                    '%03d'%fc_hr for fc_hr in fc_hrs]
 
                     for name in filename_in:
-            
                         # DOWNLOAD ALL GRB2 FILES OF THE DATE
                         # batch_ex_download = "wget -nd robots=off -r -P %s '-A %s' %s" %(out_path, file_type, url_i)
                         batch_ex_download = "wget -nd -e robots=off -A %s %s" %(
@@ -187,7 +187,7 @@ class RainfallData:
 
         # COMPARE WITH THE THRESHOLD
         grb_files = sorted([f for f in os.listdir(
-            self.inputPath) if f.endswith('.nc')])[0]
+            self.inputPath) if f.endswith('.nc')])#[0]
 
         adm_shp = self.ADMIN_AREA_GDF
         west, south, east, north = self.bound_extent(adm_shp)
@@ -200,11 +200,39 @@ class RainfallData:
         mean_by_day = xr.DataArray()
 
 
-        file_dir = self.inputPath + grb_files
-        grb = xr.open_dataset(file_dir)
-        grb_clip = grb.sel(latitude=lats, longitude=lons) # clip grb with country extent
+        # file_dir = self.inputPath + grb_files
+        # grb = xr.open_dataset(file_dir)
+        # grb_clip = grb.sel(latitude=lats, longitude=lons) # clip grb with country extent
 
-        #for leadtime in np.unique(df.leadTime.values):
+        ###  COMPARE THE THRESHOLD WITH AVERAGE OF ALL RUN CYCLES OF THE DAY (2 LEADTIMES X 1 AVG)
+        for file in grb_files:
+            file_dir = self.inputPath + file
+            # grb = pygrib.open(file_dir)
+            grb = xr.open_dataset(file_dir)#, engine='cfgrib')
+            grb_clip = grb.sel(latitude=lats, longitude=lons)  # clip grb with country extent
+            runcycle = str(grb_clip.time.dt.year.values[0]) + \
+                       '%02d' % grb_clip.time.dt.month.values[0] +\
+                       '%02d' % grb_clip.time.dt.day.values[0] +\
+                       '%02d' % grb_clip.time.dt.hour.values[0]
+            # grb_clip.rolling(step=accum_duration, center=False).sum()
+            fc_dayrange = np.unique(pd.to_datetime(grb_clip.time.values).date)
+            grb_24hrs = grb_clip.groupby(grb_clip.time.dt.day).sum()#.drop(
+                #labels=['time', 'surface'])  # sum rainfall by day
+
+            for fc_day in fc_dayrange:  # grb_24hrs.day.values:
+                # fc_day = np.datetime64(str(grb_clip.time.dt.year.values) +
+                # '-' + str(grb_clip.time.dt.month.values) + '-' + str(day))
+                # print(fc_day)
+                if len(grb_by_day.coords) == 0:
+                    grb_by_day = grb_24hrs.sel(day=fc_day.day).rename({'APCP_surface': 'APCP_surface_%s' % runcycle}).assign_coords(
+                        fc_day=fc_day).expand_dims('fc_day').drop(labels='day')
+                else:
+                    grb_by_day = xr.combine_by_coords([grb_by_day, grb_24hrs.sel(day=fc_day.day).rename(
+                        {'APCP_surface': 'APCP_surface_%s' % runcycle}).assign_coords(fc_day=fc_day).expand_dims('fc_day').drop(
+                        labels='day')])
+
+        mean_by_day = grb_by_day.to_array(dim='APCP_surface_by_day').mean('APCP_surface_by_day').rename('APCP_surface')
+   
             
         ## threshold (1 degree)
         df_leadtime = df_thresholds[df_thresholds.leadTime == self.leadTimeValue]
@@ -214,8 +242,8 @@ class RainfallData:
         threshold_gdf.crs = "EPSG:4326"
         
         ## forecast (.5 degree)
-        fc_by_day = grb_clip.sel(
-            time=grb_clip.time.values[self.leadTimeValue]).to_dataframe().reset_index()
+        fc_by_day = mean_by_day.sel(
+            fc_day=mean_by_day.fc_day.values[self.leadTimeValue]).to_dataframe().reset_index()
         geometry = [Point(xy) for xy in zip(
             fc_by_day.longitude.astype(float), fc_by_day.latitude.astype(float))]
         fc_gdf = gpd.GeoDataFrame(fc_by_day, geometry=geometry)
@@ -235,7 +263,7 @@ class RainfallData:
         
         compare_gdf[str(str(self.leadTimeLabel)+'_pred')] = np.where(
             (compare_gdf['APCP_surface'] > compare_gdf['triggerLevel']), 1, 0)
-        compare_gdf['time'] = compare_gdf['time'].astype(str)
+        compare_gdf['fc_day'] = compare_gdf['fc_day'].astype(str)
         df_trigger = compare_gdf.filter(
             ['latitude','longitude','geometry',str(str(self.leadTimeLabel)+'_pred')])
 
@@ -249,7 +277,6 @@ class RainfallData:
 
     def findTrigger_mock(self):
         # Load (static) threshold values per station
-
         df_thresholds = pd.read_json(json.dumps(self.rainfall_triggers))
 
         ### COMPARE WITH THE THRESHOLD
@@ -258,7 +285,6 @@ class RainfallData:
         ### COUNTRY SETTINGS
         # country_code = 'egy'
         adm_shp = self.ADMIN_AREA_GDF
-
         west, south, east, north = self.bound_extent(adm_shp)
 
         lats = slice(north, south)  # 32, 22

@@ -31,6 +31,8 @@ class Exposure:
         self.admin_level = admin_level
         if "population" in self.EXPOSURE_DATA_SOURCES:
             self.population_total = population_total
+        # if "alert_threshold" in self.EXPOSURE_DATA_SOURCES:
+        #     self.alert_threshold = alert_threshold
 
     def callAllExposure(self):
         for indicator, values in self.EXPOSURE_DATA_SOURCES.items():
@@ -72,6 +74,23 @@ class Exposure:
                 with open(population_affected_percentage_file_path, 'w') as fp:
                     json.dump(population_affected_percentage_records, fp)
 
+            # define alert_threshold layer
+            alert_threshold = list(map(self.get_alert_threshold, stats))
+
+            alert_threshold_file_path = PIPELINE_OUTPUT + 'calculated_affected/affected_' + \
+                self.leadTimeLabel + '_' + self.countryCodeISO3 + '_' + 'alert_threshold' + '.json'
+
+            alert_threshold_records = {
+                'countryCodeISO3': self.countryCodeISO3,
+                'exposurePlaceCodes': alert_threshold,
+                'leadTime': self.leadTimeLabel,
+                'dynamicIndicator': 'alert_threshold',
+                'adminLevel': self.admin_level
+            }
+
+            with open(alert_threshold_file_path, 'w') as fp:
+                json.dump(alert_threshold_records, fp)
+
     def get_population_affected_percentage(self, population_affected):
         population_total = next((x for x in self.population_total if x['placeCode'] == population_affected['placeCode']), None)
         population_affected_percentage = 0.0
@@ -80,6 +99,18 @@ class Exposure:
         return {
             'amount': population_affected_percentage,
             'placeCode': population_total['placeCode']
+        }
+    
+    def get_alert_threshold(self, population_affected):
+        # population_total = next((x for x in self.population_total if x['placeCode'] == population_affected['placeCode']), None)
+        alert_threshold = 0
+        if (population_affected['amount'] > 0) and population_affected['placeCode'].startswith('EG'):
+            alert_threshold = 1
+        else:
+            alert_threshold = 0
+        return {
+            'amount': alert_threshold,
+            'placeCode': population_affected['placeCode']
         }
 
     def calcAffected(self, disasterExtentRaster, indicator, rasterValue):

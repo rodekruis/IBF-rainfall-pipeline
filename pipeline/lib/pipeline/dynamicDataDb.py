@@ -18,6 +18,7 @@ class DatabaseManager:
 
     def upload(self):
         self.uploadCalculatedAffected()
+        self.uploadAlertThreshold()
         self.uploadRasterFile()
     
     def sendNotification(self):
@@ -51,6 +52,15 @@ class DatabaseManager:
                     body['disasterType'] = self.getDisasterType()
                     self.apiPostRequest('admin-area-dynamic-data/exposure', body=body)
                 print('Uploaded calculated_affected for indicator: ' + 'population_affected_percentage')
+
+    def uploadAlertThreshold(self):
+        indicator = 'alert_threshold'
+        with open(self.affectedFolder +
+                    'affected_' + self.leadTimeLabel + '_' + self.countryCodeISO3 + '_' + indicator + '.json') as json_file:
+            body = json.load(json_file)
+            body['disasterType'] = self.getDisasterType()
+            self.apiPostRequest('admin-area-dynamic-data/exposure', body=body)
+        print('Uploaded ' + indicator)
 
     def uploadRasterFile(self):
         disasterType = self.getDisasterType()
