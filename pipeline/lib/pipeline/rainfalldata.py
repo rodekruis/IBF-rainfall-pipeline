@@ -35,7 +35,8 @@ class RainfallData:
 
     def process(self):
         if self.leadTimeValue > 3:
-            self.downloaded = True
+            if SETTINGS_SECRET[self.countryCodeISO3]['mock'] == False:
+                self.downloaded = True
         if not self.downloaded:
             self.removeOldForecastData()
             self.download()
