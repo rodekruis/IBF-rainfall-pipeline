@@ -18,7 +18,7 @@ class DatabaseManager:
 
     def upload(self):
         self.uploadCalculatedAffected()
-        self.uploadAlertThreshold()
+        # self.uploadAlertThreshold()
         self.uploadRasterFile()
     
     def sendNotification(self):
