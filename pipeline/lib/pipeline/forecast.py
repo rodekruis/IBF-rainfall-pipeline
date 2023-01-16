@@ -24,6 +24,6 @@ class Forecast:
         self.admin_area_gdf = geopandas.GeoDataFrame.from_features(admin_area_json)
         self.population_total = self.db.apiGetRequest('admin-area-data/{}/{}/{}'.format(countryCodeISO3, self.admin_level, 'populationTotal'), countryCodeISO3='')
 
-        self.rainfall_triggers = self.db.apiGetRequest('rainfall-triggers',countryCodeISO3=countryCodeISO3)
-        self.rainfallData = RainfallData(leadTimeLabel, leadTimeValue, countryCodeISO3, self.admin_area_gdf, self.rainfall_triggers)
+        # self.rainfall_triggers = self.db.apiGetRequest('rainfall-triggers',countryCodeISO3=countryCodeISO3)
+        self.rainfallData = RainfallData(leadTimeLabel, leadTimeValue, countryCodeISO3, self.admin_area_gdf)#, self.rainfall_triggers)
         self.exposure = Exposure(leadTimeLabel, countryCodeISO3, self.admin_area_gdf, self.population_total, self.admin_level)

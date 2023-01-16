@@ -22,14 +22,14 @@ from pipeline.secrets import SETTINGS_SECRET
 
 class RainfallData:
 
-    def __init__(self, leadTimeLabel, leadTimeValue, countryCodeISO3, admin_area_gdf, rainfall_triggers):
+    def __init__(self, leadTimeLabel, leadTimeValue, countryCodeISO3, admin_area_gdf):#, rainfall_triggers):
         self.leadTimeLabel = leadTimeLabel
         self.leadTimeValue = leadTimeValue
         self.countryCodeISO3 = countryCodeISO3
         self.inputPath = PIPELINE_DATA + 'input/rainfall/'
         self.rainrasterPath = RASTER_OUTPUT + \
             '0/rainfall_extents/rain_rp_' + leadTimeLabel + '_' + countryCodeISO3 + '.tif'
-        self.rainfall_triggers = rainfall_triggers
+        self.rainfall_triggers = PIPELINE_DATA + 'Rainfall_station_locations_with_trigger_levels.csv'#rainfall_triggers
         self.ADMIN_AREA_GDF = admin_area_gdf
         self.downloaded = False
 
@@ -184,7 +184,8 @@ class RainfallData:
 
     def findTrigger(self):
         # Load (static) threshold values per station
-        df_thresholds = pd.read_json(json.dumps(self.rainfall_triggers))
+        # df_thresholds = pd.read_json(json.dumps(self.rainfall_triggers))
+        df_thresholds = pd.read_csv(self.rainfall_triggers)
 
         # COMPARE WITH THE THRESHOLD
         grb_files = sorted([f for f in os.listdir(
