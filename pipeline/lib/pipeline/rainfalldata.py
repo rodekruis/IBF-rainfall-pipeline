@@ -246,8 +246,9 @@ class RainfallData:
         ## forecast (.5 degree)
         fc_by_day = mean_by_day.sel(
             fc_day=mean_by_day.fc_day.values[self.leadTimeValue]).to_dataframe().reset_index()
-        geometry = [Point(xy) for xy in zip(
-            fc_by_day.longitude.astype(float), fc_by_day.latitude.astype(float))]
+        geometry = gpd.points_from_xy(fc_by_day.longitude.astype(float), fc_by_day.latitude.astype(float))
+            #[Point(xy) for xy in zip(
+            #fc_by_day.longitude.astype(float), fc_by_day.latitude.astype(float))]
         fc_gdf = gpd.GeoDataFrame(fc_by_day, geometry=geometry)
         fc_gdf.crs = "EPSG:4326"
 
