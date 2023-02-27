@@ -22,6 +22,8 @@ class Exposure:
         self.countryCodeISO3 = countryCodeISO3
         self.disasterExtentRaster = RASTER_OUTPUT + \
             '0/rainfall_extents/rain_rp_' + leadTimeLabel + '_' + countryCodeISO3 + '.tif'
+        self.disasterExtentEmptyRaster = RASTER_OUTPUT + \
+            '0/rainfall_extents/rain_rp_' + leadTimeLabel + '_' + countryCodeISO3 + '_notrigger.tif'
         self.selectionValue = 0.9
         self.outputPath = PIPELINE_OUTPUT + "out.tif"
         self.district_mapping = district_mapping
@@ -42,6 +44,10 @@ class Exposure:
                 values['source'] + self.leadTimeLabel
 
             stats = self.calcAffected(self.disasterExtentRaster, indicator, values['rasterValue'])
+            if sum(item['amount'] for item in stats) <= 10000000: # filter only events has high impact
+                for d in stats:
+                    d.update((k, 0) for k, v in d.items() if k=="amount")
+                os.replace(self.disasterExtentEmptyRaster, self.disasterExtentRaster)
 
             result = {
                 'countryCodeISO3': self.countryCodeISO3,

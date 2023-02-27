@@ -279,7 +279,8 @@ class RainfallData:
 
     def findTrigger_mock(self):
         # Load (static) threshold values per station
-        df_thresholds = pd.read_json(json.dumps(self.rainfall_triggers))
+        # df_thresholds = pd.read_json(json.dumps(self.rainfall_triggers))
+        df_thresholds = pd.read_csv(self.rainfall_triggers)
 
         ### COMPARE WITH THE THRESHOLD
         grb_files = sorted([f for f in os.listdir(self.inputPath) if f.endswith('.grb2')])
