@@ -36,7 +36,7 @@ RUN wget ftp://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/wgrib2.tgz \
     && cp -r /tmp/grib2/ /usr/bin/grib2/ && rm -R /tmp/grib2/ \
     && cd /usr/bin/grib2/grib2 \
     && export FC=gfortran && export CC=gcc \
-    && make \
+    && make USE_AEC=0 \
     && ln -s /usr/bin/grib2/grib2/wgrib2/wgrib2 /usr/bin/wgrib2 \
     && apt-get -y autoremove build-essential
 
